@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- This is our MVP for the Practice Extension -->
+<root release="3.0" version="6">
+	<announcement text="DnD 4e Races extension made by SieferSeesSomething is activated. Last release 06/05/2025" font="emotefont" icon="rulesetlogo_CoreRPG"/>
+	<properties>
+		<name>DnD 4e - Character Races Extension</name>
+		<version>0.2.0</version>
+		<author>Jason Williams</author>
+		<description>
+		Adds a character options menu for races and a link to the character sheet.
+		Made for use with the DnD 4e Compendium converter.
+		</description>
+	</properties>
+
+	<importruleset source="CoreRPG" />
+
+	<base>
+		<!-- Library Data -->
+		<script name="LibraryDataExtensionPractice" file="scripts/data_library.lua" />
+
+		<!-- Campaign -->
+		<includefile source="campaign/record_char_main.xml" />
+		<includefile source="campaign/record_race.xml" /> 
+
+		<!-- High-Level Scripts -->
+		<script name="CharManagerWith4ERaceExtension" file="scripts/manager_char_4e.lua" />		
+		<script name="CharBuildDropManager" file="scripts\manager_char_build_drop_4e.lua" />
+		<script name="CharRaceManager" file="scripts/manager_char_race_4e.lua" />
+		<script name="RaceManager" file="scripts/manager_race_4e.lua" />
+
+		<!-- String resources -->
+		<includefile source="strings/strings.xml" />
+		<includefile source="strings/strings_4E_char_build.xml" />
+
+		<!-- Image resources -->
+	</base>
+</root>

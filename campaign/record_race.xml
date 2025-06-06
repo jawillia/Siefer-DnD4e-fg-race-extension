@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- 
+  Please see the license.html file included with this distribution for 
+  attribution and copyright information.
+-->
+
+<root>
+  <windowclass name="reference_race" copy="record_window_tabbed">
+    <tab>
+      <name>notes</name>
+      <resource>tab_main</resource>
+      <class>reference_race_main</class>
+      <embed />
+    </tab>
+    <tab merge="add">
+      <name>main</name>
+      <resource>tab_other</resource>
+      <class>reference_race_traits</class>
+      <embed />
+    </tab>
+    <tab merge="add">
+      <name>features</name>
+      <resource>tab_abilities</resource>
+      <class>reference_race_features</class>
+      <embed />
+    </tab>    
+  </windowclass>
+
+  <windowclass name="reference_race_header" copy="record_header" />
+
+  <windowclass name="reference_race_main">
+    <script>
+      function onInit()
+        update();
+      end
+      
+      function update()
+        local bReadOnly = WindowManager.getReadOnlyState(getDatabaseNode());
+        flavor.update(bReadOnly);
+
+        WindowManager.callSafeControlUpdate(self, "shortdescription", bReadOnly);
+        WindowManager.callSafeControlUpdate(self, "description", bReadOnly);
+      end
+      function onDrop(x, y, draginfo)
+        if WindowManager.getReadOnlyState(getDatabaseNode()) then
+          return true;
+        end
+        if draginfo.isType("shortcut") then
+          local sClass = draginfo.getShortcutData();
+          local nodeSource = draginfo.getDatabaseNode();
+          
+          if sClass == "reference_racialtrait" or sClass == "reference_subracialtrait" then
+            self.addTrait(DB.getValue(nodeSource, "name", ""), DB.getText(nodeSource, "text", ""));
+          end
+          return true;
+        end
+      end
+      function addTrait(sName, sText)
+        local nodeTrait = DB.createChild(DB.getPath(getDatabaseNode(), "traits"));
+        if nodeTrait then
+          DB.setValue(nodeTrait, "name", "string", sName);
+          DB.setValue(nodeTrait, "text", "formattedtext", sText);
+        end
+      end
+    </script>
+    <sheetdata>
+      <anchor_column name="columnanchor" />
+      
+      <stringc_column_flavor name="flavor" />
+
+      <header_column name="shortdescription_label">
+        <static textres="power_header_shortdescription" />
+      </header_column>
+      <string_columnh_full name="shortdescription" />
+      
+      <header_column name="description_label">
+        <static textres="power_header_description" />
+      </header_column>
+      <ft_columnh name="description" />      
+    </sheetdata>
+  </windowclass>  
+
+  <windowclass name="reference_race_traits">
+<!--     <script>
+      function onInit()
+        self.update();
+      end
+      function onVersionChanged()
+        self.update();
+      end
+      function update()
+        local nodeRecord = getDatabaseNode();
+        local bIs2024 = (DB.getValue(nodeRecord, "version", "") == "2024");
+        if bIs2024 then
+          sub_content.setValue("reference_race_main_2024", nodeRecord);
+        else
+          sub_content.setValue("reference_race_main_2014", nodeRecord);
+        end
+        WindowManager.callSafeControlUpdate(self, "sub_content", bReadOnly);
+      end
+      function onDrop(x, y, draginfo)
+        if WindowManager.getReadOnlyState(getDatabaseNode()) then
+          return true;
+        end
+        if draginfo.isType("shortcut") then
+          local sClass = draginfo.getShortcutData();
+          local nodeSource = draginfo.getDatabaseNode();
+          
+          if sClass == "reference_racialtrait" or sClass == "reference_subracialtrait" then
+            self.addTrait(DB.getValue(nodeSource, "name", ""), DB.getText(nodeSource, "text", ""));
+          end
+          return true;
+        end
+      end
+      function addTrait(sName, sText)
+        local nodeTrait = DB.createChild(DB.getPath(getDatabaseNode(), "traits"));
+        if nodeTrait then
+          DB.setValue(nodeTrait, "name", "string", sName);
+          DB.setValue(nodeTrait, "text", "formattedtext", sText);
+        end
+      end
+    </script> -->
+    <script>
+      function onInit()
+        self.update();
+      end
+      function update()
+        local nodeRecord = getDatabaseNode();
+        RaceManager.checkForSpeed(nodeRecord);
+        RaceManager.checkForSize(nodeRecord);
+        RaceManager.checkForAbilityScores(nodeRecord);
+        RaceManager.checkForVision(nodeRecord);
+        RaceManager.checkForLanguages(nodeRecord);
+        RaceManager.checkForSkillBonuses(nodeRecord);
+        local bReadOnly = WindowManager.getReadOnlyState(getDatabaseNode());
+        local tFields = { "abilityscores", "size", "speed", "vision", "languages", "skillbonuses", "list" };
+        WindowManager.callSafeControlsUpdate(self, tFields, bReadOnly);
+      end    
+    </script>
+    <sheetdata>
+      <anchor_content_top />
+
+      <label_content_column name="abilityScores_label">
+        <static textres="race_label_abilityScores" />
+      </label_content_column>
+      <string_content_columnh name="abilityscores" />      
+
+      <label_content_column name="size_label">
+        <static textres="race_label_size" />
+      </label_content_column>
+      <string_content_columnh name="size" />
+
+      <label_content_column name="speed_label">
+        <static textres="race_label_speed" />
+      </label_content_column>
+      <string_content_columnh name="speed" />
+
+      <label_content_column name="vision_label">
+        <static textres="race_label_vision" />
+      </label_content_column>
+      <string_content_columnh name="vision" /> 
+
+      <label_content_column name="languages_label">
+        <static textres="race_label_languages" />
+      </label_content_column>
+      <string_content_columnh name="languages" />
+
+      <label_content_column name="skillbonuses_label">
+        <static textres="race_label_skillbonuses" />
+      </label_content_column>
+      <string_content_columnh name="skillbonuses" />          
+      
+      <header_content_framed_headersimple name="list_header">
+        <static textres="race_header_traits"/>
+      </header_content_framed_headersimple>
+      <button_iedit name="list_iedit">
+        <anchored to="list_header" position="insidetopright" offset="2,0" />
+        <edittarget>list</edittarget>
+      </button_iedit>
+      <button_iadd name="list_iadd">
+        <anchored to="list_header" position="insidetopright" offset="22,0" />
+      </button_iadd>
+      <list_content_column name="list">
+        <datasource>.traits</datasource>
+        <class>reference_racialtrait_listitem</class>
+        <sortby><field>name</field></sortby>
+      </list_content_column>
+    </sheetdata>
+  </windowclass>
+
+  <windowclass name="reference_racialtrait_listitem">
+    <margins control="0,0,0,2" />
+    <script>
+      function update(bReadOnly)
+        WindowManager.callSafeControlUpdate(self, "name", bReadOnly);
+      end
+    </script>
+    <sheetdata>
+      <anchor_listitem_left_sm name="leftanchor" />
+      <anchor_listitem_right_sm name="rightanchor" />
+
+      <linkc_listitem_right name="shortcut">
+        <class>reference_racialtrait</class>
+      </linkc_listitem_right>
+      <button_listitem_idelete name="idelete">
+        <editmode>list_iedit</editmode>
+      </button_listitem_idelete>
+
+      <string_listitem_center name="name">
+        <empty textres="library_recordtype_empty_racialtrait" />
+        <font>sheetlabel</font>
+      </string_listitem_center>
+    </sheetdata>
+  </windowclass>
+
+  <windowclass name="reference_racialtrait" copy="record_window_text" />
+  <windowclass name="reference_racialtrait_header" copy="record_header">
+    <name_emptyres>library_recordtype_empty_racialtrait</name_emptyres>
+  </windowclass>  
+
+  <windowclass name="reference_race_features">
+    <script>
+      function onInit()
+        self.update();
+      end
+      function update()
+        local nodeRecord = getDatabaseNode();
+        local bReadOnly = WindowManager.getReadOnlyState(getDatabaseNode());
+        local tFields = { "featureslist", "powerslist" };
+        WindowManager.callSafeControlsUpdate(self, tFields, bReadOnly);
+      end
+    </script>
+    <sheetdata>
+      <anchor_content_top />
+
+      <header_content_framed_headersimple name="featureslist_header">
+        <static textres="race_header_features"/>
+      </header_content_framed_headersimple>       
+      <button_iedit name="featureslist_iedit">
+        <anchored to="featureslist_header" position="insidetopright" offset="5,0" />
+        <edittarget>featureslist</edittarget>
+      </button_iedit>
+      <button_iadd name="featureslist_iadd">
+        <anchored to="featureslist_header" position="insidetopright" offset="30,0" />
+        <target>featureslist</target>
+      </button_iadd>
+      <list_content_column name="featureslist">
+        <datasource>.features</datasource>
+        <class>reference_racialfeature_listitem</class>
+        <sortby><field>name</field></sortby>
+      </list_content_column>
+
+      <header_content_framed_headersimple name="powerslist_header">
+        <static textres="race_header_featurepowers"/>
+      </header_content_framed_headersimple>
+      <button_iedit name="powerslist_iedit">
+        <anchored to="powerslist_header" position="insidetopright" offset="5,0" />
+        <edittarget>powerslist</edittarget>
+      </button_iedit>
+      <button_iadd name="powerslist_iadd">
+        <anchored to="powerslist_header" position="insidetopright" offset="30,0" />
+        <target>powerslist</target>
+      </button_iadd>
+      <list_content_column name="powerslist">
+        <datasource>.powers</datasource>
+        <class>reference_racialpower_listitem</class>
+        <sortby><field>name</field></sortby>
+      </list_content_column>      
+    </sheetdata>
+  </windowclass>
+
+  <windowclass name="reference_racialfeature_listitem">
+    <margins control="0,0,0,2" />
+    <script>
+      function update(bReadOnly)
+        WindowManager.callSafeControlUpdate(self, "name", bReadOnly);
+      end
+    </script>
+    <sheetdata>
+      <anchor_listitem_left_sm name="leftanchor" />
+      <anchor_listitem_right_sm name="rightanchor" />
+
+      <linkc_listitem_right name="shortcut">
+        <class>reference_racialfeature</class>
+      </linkc_listitem_right>
+      <button_listitem_idelete name="idelete">
+        <editmode>featureslist_iedit</editmode>
+      </button_listitem_idelete>
+
+      <string_listitem_center name="name">
+        <empty textres="library_recordtype_empty_racialfeature" />
+        <font>sheetlabel</font>
+      </string_listitem_center>
+    </sheetdata>
+  </windowclass>
+
+  <windowclass name="reference_racialfeature" copy="record_window">
+    <sheetdata>
+      <sub_content_framed_groupbox name="content">
+        <class>record_content_description</class>
+      </sub_content_framed_groupbox>
+    </sheetdata>
+  </windowclass>
+  <windowclass name="reference_racialfeature_header" copy="record_header">
+    <name_emptyres>library_recordtype_empty_racialfeature</name_emptyres>
+  </windowclass>
+
+  <windowclass name="reference_racialpower_listitem">
+    <margins control="0,0,0,2" />
+    <script>
+      function update(bReadOnly)
+        WindowManager.callSafeControlUpdate(self, "name", bReadOnly);
+      end
+    </script>
+    <sheetdata>
+      <anchor_listitem_left_sm name="leftanchor" />
+      <anchor_listitem_right_sm name="rightanchor" />
+
+      <linkc_listitem_right name="shortcut">
+        <class>powerdesc</class>
+      </linkc_listitem_right>
+      <button_listitem_idelete name="idelete">
+        <editmode>powerslist_iedit</editmode>
+      </button_listitem_idelete>
+
+      <string_listitem_center name="name">
+        <empty textres="library_recordtype_empty_racialfeature" />
+        <font>sheetlabel</font>
+      </string_listitem_center>
+    </sheetdata>
+  </windowclass>  
+</root>

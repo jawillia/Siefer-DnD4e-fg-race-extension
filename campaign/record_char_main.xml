@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- 
+  Please see the license.html file included with this distribution for 
+  attribution and copyright information.
+-->
+
+<root>	
+	<windowclass name="charsheet_main" merge="join">
+		<script>
+			function onDrop(x, y, draginfo)
+				if draginfo.isType("shortcut") then
+					local sClass, sRecord = draginfo.getShortcutData();
+					if StringManager.startsWith(sRecord, "reference.races") or StringManager.startsWith(sRecord, "race.id-") then
+						return CharBuildDropManager.addInfoDB(getDatabaseNode(), sClass, sRecord);
+					end
+				end
+			end
+		</script>
+		<sheetdata>	
+			<linkfield_statich name="racelink">
+				<anchored to="raceframe" position="insidetopright" offset="-2,8" width="20" height="20" />
+<!-- 				<anchored to="speciesrightanchor" width="20" height="20">
+					<top />
+					<right relation="relative" offset="-2" postoffset="-2" />
+				</anchored> -->
+				<description field="race" />
+				<script>
+					function onClickDown()
+						return true;
+					end
+					function onClickRelease()
+						return CharManagerWith4ERaceExtension.onRaceLinkPressed(window.getDatabaseNode());
+					end
+				</script>
+			</linkfield_statich>
+		</sheetdata>
+	</windowclass>
+</root>

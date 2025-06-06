@@ -1,0 +1,24 @@
+-- 
+-- Please see the license.html file included with this distribution for 
+-- attribution and copyright information.
+--
+
+<root>
+	<!-- Records -->
+	<string name="library_recordtype_label_race">Races</string>
+	<string name="library_recordtype_single_race">Race</string>
+	<string name="library_recordtype_empty_race">&#171; New Race &#187;</string>
+
+	<string name="race_header_traits">Racial Traits</string>
+	<string name="race_label_speed">Speed</string>
+	<string name="race_label_size">Size</string>
+	<string name="race_label_vision">Vision</string>
+	<string name="race_label_abilityScores">Ability Scores</string>
+	<string name="race_label_languages">Languages</string>
+	<string name="race_label_skillbonuses">Skill Bonuses</string>
+	<string name="library_recordtype_empty_racialtrait">&#171; New Racial Trait &#187;</string>	
+
+	<string name="race_header_features">Racial Features</string>
+	<string name="library_recordtype_empty_racialfeature">&#171; New Racial Feature &#187;</string>
+	<string name="race_header_featurepowers">Racial Powers</string>
+</root>

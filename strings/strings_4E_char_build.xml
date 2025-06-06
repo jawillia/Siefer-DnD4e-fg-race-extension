@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- 
+  Please see the license.html file included with this distribution for 
+  attribution and copyright information.
+-->
+
+<root>
+  <!-- Character - Build -->
+  <string name="char_abilities_message_raceadd">Race '%s' added to '%s'.</string>
+  <string name="char_abilities_message_featureadd">Racial Trait '%s' added to '%s' special ability list.</string>
+  <string name="char_abilities_message_poweradd">Racial Power '%s' added to '%s' powers list.</string> 
+</root>
