@@ -16,6 +16,9 @@ function addRace(nodeChar, sRecord, tData)
 	--Add Race Powers
 	addRacePowers(rAdd, sRecord, sDescriptionText);
 
+	--Add Speed
+	addRaceSpeed(rAdd, sRecord, sDescriptionText);
+
 	-- Notification
 	ChatManager.SystemMessageResource("char_abilities_message_raceadd", sRaceName, rAdd.sCharName);
 
@@ -45,7 +48,8 @@ function addRaceFeatures(rAdd, sRecord, sDescriptionText)
 			local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("specialabilitylist"));
 			DB.setValue(rCreatedIDChildNode, "description", "string", DB.getText(DB.getPath(nodeChild, "description")));
       		DB.createChild(rCreatedIDChildNode, "shortcut", "windowreference");
-      		DB.setValue(rCreatedIDChildNode, "value", "string", DB.getText(DB.getPath(nodeChild, "name")));
+      		local sRacialFeatureName = DB.setValue(rCreatedIDChildNode, "value", "string", DB.getText(DB.getPath(nodeChild, "name")));
+      		ChatManager.SystemMessageResource("char_abilities_message_featureadd", sRacialFeatureName, rAdd.sCharName);
     	end
 	end
 end
@@ -81,7 +85,6 @@ function addRacePowers(rAdd, sRecord, sDescriptionText)
 	if isDescriptionPowerLinkEmpty == true then
 		local sRecordPowerNode = DB.findNode(DB.getPath(sRecord, "powers"));
 		local nodePowerChildren = DB.getChildren(sRecordPowerNode);
-		Debug.console("nodePowerChildren:",nodePowerChildren);
 		for nodeName,nodeChild in pairs(nodePowerChildren) do
 			Debug.console("Flavor:",DB.getText(DB.getPath(nodeChild, "flavor")));
 			Debug.console("Description:",DB.getText(DB.getPath(nodeChild, "shortdescription")));
@@ -112,6 +115,27 @@ end
 
 function addRaceTraits(rAdd, sRecord, sDescriptionText)
 	local sRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "powers"));
+end
+
+function addRaceSpeed(rAdd, sRecord, sDescriptionText)
+	local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
+	if rRecordTraitsNode then
+		local rSpeedTraitsNode = DB.getChild(rRecordTraitsNode, "speed");
+		local rSpeedNode = DB.findNode(DB.getPath(sRecord, "speed"));
+		local sSpeedText = '';
+		local sSpeedValue = '';
+		if rSpeedTraitsNode then
+			sSpeedText = DB.getChild(rSpeedTraitsNode, "text");
+			sSpeedValue = string.match(DB.getText(sSpeedText), "%d+");
+		elseif rSpeedNode then
+			sSpeedValue = string.match(DB.getText(rSpeedNode), "%d+");
+		end
+		local rCharacterSpeedNode = DB.findNode(rAdd.nodeChar.getPath("speed"));
+		if rCharacterSpeedNode then
+			DB.setValue(rCharacterSpeedNode, "base", "number", sSpeedValue);
+			ChatManager.SystemMessageResource("char_combat_message_speedadd", sSpeedValue, rAdd.sCharName);
+		end
+	end
 end
 
 function helperResolveAncestryOnRaceDrop(rAdd)

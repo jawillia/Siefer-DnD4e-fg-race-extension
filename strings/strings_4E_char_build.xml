@@ -9,5 +9,6 @@
   <!-- Character - Build -->
   <string name="char_abilities_message_raceadd">Race '%s' added to '%s'.</string>
   <string name="char_abilities_message_featureadd">Racial Trait '%s' added to '%s' special ability list.</string>
-  <string name="char_abilities_message_poweradd">Racial Power '%s' added to '%s' powers list.</string> 
+  <string name="char_abilities_message_poweradd">Racial Power '%s' added to '%s' powers list.</string>
+  <string name="char_combat_message_speedadd">Base Speed set to '%s' for '%s'.</string>  
 </root>
