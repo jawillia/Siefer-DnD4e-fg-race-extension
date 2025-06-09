@@ -13,4 +13,6 @@
   <string name="char_combat_message_speedadd">Base Speed set to '%s' for '%s'.</string>  
   <string name="char_combat_message_specialspeedadd">Special Movement set to '%s' for '%s'.</string>
   <string name="char_combat_message_sizeadd">Size set to '%s' for '%s'.</string>
+  <string name="char_combat_message_visionadd">Senses set to '%s' for '%s'.</string>
+  <string name="char_combat_message_languageadd">Language '%s' added to '%s' language list.</string>
 </root>
