@@ -117,6 +117,8 @@ end
 function addRaceTraits(rAdd, sRecord, sDescriptionText)
 	addRaceSpeed(rAdd, sRecord, sDescriptionText);
 	addRaceSize(rAdd, sRecord, sDescriptionText);
+	addRaceVision(rAdd, sRecord, sDescriptionText);
+	addRaceLanguages(rAdd, sRecord, sDescriptionText);
 end
 
 function addRaceSpeed(rAdd, sRecord, sDescriptionText)
@@ -150,20 +152,58 @@ function addRaceSize(rAdd, sRecord, sDescriptionText)
 	local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
 	if rRecordTraitsNode then
 		local rSizeTraitsNode = DB.getChild(rRecordTraitsNode, "size");
-		Debug.console("rSizeTraitsNode:",rSizeTraitsNode);
 		local rSizeNode = DB.findNode(DB.getPath(sRecord, "size"));
-		Debug.console("rSizeNode:",rSizeNode);
 		local sSizeValue = '';
 		if rSizeTraitsNode then
 			local rSizeTextNode = DB.getChild(rSizeTraitsNode, "text");
 			sSizeValue = DB.getText(rSizeTextNode);
 		elseif rSizeNode then
 			sSizeValue = DB.getText(rSizeNode);
-			Debug.console("sSizeValue:",sSizeValue);
 		end
 		if sSizeValue then
 			DB.setValue(rAdd.nodeChar, "size", "string", sSizeValue);
 			ChatManager.SystemMessageResource("char_combat_message_sizeadd", sSizeValue, rAdd.sCharName);
+		end
+	end
+end
+
+function addRaceVision(rAdd, sRecord, sDescriptionText)
+	local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
+	if rRecordTraitsNode then
+		local rVisionTraitsNode = DB.getChild(rRecordTraitsNode, "vision");
+		local rVisionNode = DB.findNode(DB.getPath(sRecord, "vision"));
+		local sVisionValue = '';
+		if rVisionTraitsNode then
+			local rSizeTextNode = DB.getChild(rVisionTraitsNode, "text");
+			sVisionValue = DB.getText(rSizeTextNode);
+		elseif rVisionNode then
+			sVisionValue = DB.getText(rVisionNode);
+		end
+		if sVisionValue then
+			DB.setValue(rAdd.nodeChar, "senses", "string", sVisionValue);
+			ChatManager.SystemMessageResource("char_combat_message_visioneadd", sVisionValue, rAdd.sCharName);
+		end
+	end
+end
+
+function addRaceLanguages(rAdd, sRecord, sDescriptionText)
+	local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
+	if rRecordTraitsNode then
+		local rLanguagesTraitsNode = DB.getChild(rRecordTraitsNode, "languages");
+		local rLanguagesNode = DB.findNode(DB.getPath(sRecord, "languages"));
+		local sLanguagesValue = '';
+		if rLanguagesTraitsNode then
+			local rSizeTextNode = DB.getChild(rLanguagesTraitsNode, "text");
+			sLanguagesValue = DB.getText(rSizeTextNode);
+		elseif rLanguagesNode then
+			sLanguagesValue = DB.getText(rLanguagesNode);
+		end
+		local tLanguages = StringManager.split(sLanguagesValue, ',', true);
+		for _,x in pairs(tLanguages) do
+			Debug.console("x:", x);
+			local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("languagelist"));
+			DB.setValue(rCreatedIDChildNode, "name", "string", x);
+			ChatManager.SystemMessageResource("char_combat_message_languageadd", x, rAdd.sCharName);
 		end
 	end
 end
