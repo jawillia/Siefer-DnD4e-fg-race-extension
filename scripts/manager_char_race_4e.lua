@@ -28,7 +28,7 @@ function addRace(nodeChar, sRecord, tData)
 end
 
 function addRaceFeatures(rAdd, sRecord, sDescriptionText)
-	local sPattern = '<link class="powerdesc" recordname="reference.features.(%w+)@([%w%s]+)">'
+	local sPattern = '<link class="powerdesc" recordname="reference.features.(%w+)@([%w%s]+)">';
 	local sFeaturesLink = string.gmatch(sDescriptionText, sPattern);
 	local isDescriptionFeatureLinkEmpty = true;
 	for w,v in sFeaturesLink do
@@ -48,7 +48,8 @@ function addRaceFeatures(rAdd, sRecord, sDescriptionText)
 			local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("specialabilitylist"));
 			DB.setValue(rCreatedIDChildNode, "description", "string", DB.getText(DB.getPath(nodeChild, "description")));
       		DB.createChild(rCreatedIDChildNode, "shortcut", "windowreference");
-      		local sRacialFeatureName = DB.setValue(rCreatedIDChildNode, "value", "string", DB.getText(DB.getPath(nodeChild, "name")));
+      		DB.setValue(rCreatedIDChildNode, "value", "string", DB.getText(DB.getPath(nodeChild, "name")));
+      		local sRacialFeatureName = DB.getText(rCreatedIDChildNode);
       		ChatManager.SystemMessageResource("char_abilities_message_featureadd", sRacialFeatureName, rAdd.sCharName);
     	end
 	end
@@ -57,7 +58,7 @@ end
 function addRacePowers(rAdd, sRecord, sDescriptionText)
 	local referenceStaticNode = DB.findNode("reference.powers.");
 	local powersNode = DB.getChild(referenceStaticNode, "powers");
-	local sPowersPattern = '<link class="powerdesc" recordname="reference.powers.(%w+)@([%w%s]+)">'
+	local sPowersPattern = '<link class="powerdesc" recordname="reference.powers.(%w+)@([%w%s]+)">';
 	local sPowersLink = string.gmatch(sDescriptionText, sPowersPattern);
 	local isDescriptionPowerLinkEmpty = true;
 	for w,v in sPowersLink do
@@ -122,18 +123,24 @@ function addRaceSpeed(rAdd, sRecord, sDescriptionText)
 	if rRecordTraitsNode then
 		local rSpeedTraitsNode = DB.getChild(rRecordTraitsNode, "speed");
 		local rSpeedNode = DB.findNode(DB.getPath(sRecord, "speed"));
-		local sSpeedText = '';
 		local sSpeedValue = '';
+		local sSpecialSpeed = '';
 		if rSpeedTraitsNode then
-			sSpeedText = DB.getChild(rSpeedTraitsNode, "text");
+			local sSpeedText = DB.getChild(rSpeedTraitsNode, "text");
+			sSpecialSpeed = string.match(DB.getText(sSpeedText), "%.(.*)");
 			sSpeedValue = string.match(DB.getText(sSpeedText), "%d+");
 		elseif rSpeedNode then
+			sSpecialSpeed = string.match(DB.getText(rSpeedNode), "%.(.*)");
 			sSpeedValue = string.match(DB.getText(rSpeedNode), "%d+");
 		end
 		local rCharacterSpeedNode = DB.findNode(rAdd.nodeChar.getPath("speed"));
-		if rCharacterSpeedNode then
+		if rCharacterSpeedNode and sSpeedValue then
 			DB.setValue(rCharacterSpeedNode, "base", "number", sSpeedValue);
 			ChatManager.SystemMessageResource("char_combat_message_speedadd", sSpeedValue, rAdd.sCharName);
+		end
+		if sSpecialSpeed then
+			DB.setValue(rCharacterSpeedNode, "special", "string", sSpecialSpeed);
+			ChatManager.SystemMessageResource("char_combat_message_specialspeedadd", sSpecialSpeed, rAdd.sCharName);
 		end
 	end
 end
