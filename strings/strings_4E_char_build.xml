@@ -12,4 +12,5 @@
   <string name="char_abilities_message_poweradd">Racial Power '%s' added to '%s' powers list.</string>
   <string name="char_combat_message_speedadd">Base Speed set to '%s' for '%s'.</string>  
   <string name="char_combat_message_specialspeedadd">Special Movement set to '%s' for '%s'.</string>
+  <string name="char_combat_message_sizeadd">Size set to '%s' for '%s'.</string>
 </root>

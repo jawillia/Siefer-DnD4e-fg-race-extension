@@ -16,8 +16,8 @@ function addRace(nodeChar, sRecord, tData)
 	--Add Race Powers
 	addRacePowers(rAdd, sRecord, sDescriptionText);
 
-	--Add Speed
-	addRaceSpeed(rAdd, sRecord, sDescriptionText);
+	--Add Traits
+	addRaceTraits(rAdd, sRecord, sDescriptionText);
 
 	-- Notification
 	ChatManager.SystemMessageResource("char_abilities_message_raceadd", sRaceName, rAdd.sCharName);
@@ -115,7 +115,8 @@ function addRacePowers(rAdd, sRecord, sDescriptionText)
 end
 
 function addRaceTraits(rAdd, sRecord, sDescriptionText)
-	local sRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "powers"));
+	addRaceSpeed(rAdd, sRecord, sDescriptionText);
+	addRaceSize(rAdd, sRecord, sDescriptionText);
 end
 
 function addRaceSpeed(rAdd, sRecord, sDescriptionText)
@@ -141,6 +142,28 @@ function addRaceSpeed(rAdd, sRecord, sDescriptionText)
 		if sSpecialSpeed then
 			DB.setValue(rCharacterSpeedNode, "special", "string", sSpecialSpeed);
 			ChatManager.SystemMessageResource("char_combat_message_specialspeedadd", sSpecialSpeed, rAdd.sCharName);
+		end
+	end
+end
+
+function addRaceSize(rAdd, sRecord, sDescriptionText)
+	local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
+	if rRecordTraitsNode then
+		local rSizeTraitsNode = DB.getChild(rRecordTraitsNode, "size");
+		Debug.console("rSizeTraitsNode:",rSizeTraitsNode);
+		local rSizeNode = DB.findNode(DB.getPath(sRecord, "size"));
+		Debug.console("rSizeNode:",rSizeNode);
+		local sSizeValue = '';
+		if rSizeTraitsNode then
+			local rSizeTextNode = DB.getChild(rSizeTraitsNode, "text");
+			sSizeValue = DB.getText(rSizeTextNode);
+		elseif rSizeNode then
+			sSizeValue = DB.getText(rSizeNode);
+			Debug.console("sSizeValue:",sSizeValue);
+		end
+		if sSizeValue then
+			DB.setValue(rAdd.nodeChar, "size", "string", sSizeValue);
+			ChatManager.SystemMessageResource("char_combat_message_sizeadd", sSizeValue, rAdd.sCharName);
 		end
 	end
 end
