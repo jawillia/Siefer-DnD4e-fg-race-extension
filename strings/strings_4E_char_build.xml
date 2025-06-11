@@ -11,8 +11,14 @@
   <string name="char_abilities_message_featureadd">Racial Trait '%s' added to '%s' special ability list.</string>
   <string name="char_abilities_message_poweradd">Racial Power '%s' added to '%s' powers list.</string>
   <string name="char_combat_message_speedadd">Base Speed set to '%s' for '%s'.</string>  
-  <string name="char_combat_message_specialspeedadd">Special Movement set to '%s' for '%s'.</string>
-  <string name="char_combat_message_sizeadd">Size set to '%s' for '%s'.</string>
-  <string name="char_combat_message_visionadd">Senses set to '%s' for '%s'.</string>
-  <string name="char_combat_message_languageadd">Language '%s' added to '%s' language list.</string>
+  <string name="char_main_message_specialspeedadd">Special Movement set to '%s' for '%s'.</string>
+  <string name="char_notes_message_sizeadd">Size set to '%s' for '%s'.</string>
+  <string name="char_main_message_visionadd">Senses set to '%s' for '%s'.</string>
+  <string name="char_notes_message_languageadd">Language '%s' added to '%s' language list.</string>
+  <string name="char_skills_message_skillbonusadd">+%s bonus given to '%s' skill for '%s'.</string>
+  <string name="char_main_message_statbonusadd">+%s %s bonus for '%s'.</string>
+
+  <string name="char_build_title_selectraceabilitybonus">Increase Ability Score</string>
+  <string name="char_build_message_selectraceabilitybonus">Select an ability score increase.</string>
+  <string name="char_error_addrace">Error adding race ability score.</string>
 </root>
