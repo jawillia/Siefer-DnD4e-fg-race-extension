@@ -119,6 +119,10 @@ function addRacePowers(rAdd, sRecord, sDescriptionText)
 end
 
 function addRaceTraits(rAdd, sRecord, sDescriptionText)
+	-- Parsing Order for these: 
+	--- 1) First checks race speed node, 
+	--- 2) Then traits nodes, 
+	--- 3) Then description text
 	addRaceSpeed(rAdd, sRecord, sDescriptionText);
 	addRaceSize(rAdd, sRecord, sDescriptionText);
 	addRaceVision(rAdd, sRecord, sDescriptionText);
@@ -126,29 +130,33 @@ function addRaceTraits(rAdd, sRecord, sDescriptionText)
 end
 
 function addRaceSpeed(rAdd, sRecord, sDescriptionText)
-	local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
-	if rRecordTraitsNode then
+	local nSpeedValue = '';
+	local sSpecialSpeed = '';
+	local rSpeedNode = DB.findNode(DB.getPath(sRecord, "speed"));
+	if rSpeedNode then
+			sSpecialSpeed = string.match(DB.getText(rSpeedNode), "%.(.*)");
+			nSpeedValue = string.match(DB.getText(rSpeedNode), "%d+");
+	elseif DB.findNode(DB.getPath(sRecord, "traits")) then
+		local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
 		local rSpeedTraitsNode = DB.getChild(rRecordTraitsNode, "speed");
-		local rSpeedNode = DB.findNode(DB.getPath(sRecord, "speed"));
-		local sSpeedValue = '';
-		local sSpecialSpeed = '';
 		if rSpeedTraitsNode then
 			local sSpeedText = DB.getChild(rSpeedTraitsNode, "text");
 			sSpecialSpeed = string.match(DB.getText(sSpeedText), "%.(.*)");
-			sSpeedValue = string.match(DB.getText(sSpeedText), "%d+");
-		elseif rSpeedNode then
-			sSpecialSpeed = string.match(DB.getText(rSpeedNode), "%.(.*)");
-			sSpeedValue = string.match(DB.getText(rSpeedNode), "%d+");
+			nSpeedValue = string.match(DB.getText(sSpeedText), "%d+");
 		end
-		local rCharacterSpeedNode = DB.findNode(rAdd.nodeChar.getPath("speed"));
-		if rCharacterSpeedNode and sSpeedValue then
-			DB.setValue(rCharacterSpeedNode, "base", "number", sSpeedValue);
-			ChatManager.SystemMessageResource("char_combat_message_speedadd", sSpeedValue, rAdd.sCharName);
-		end
-		if sSpecialSpeed then
-			DB.setValue(rCharacterSpeedNode, "special", "string", sSpecialSpeed);
-			ChatManager.SystemMessageResource("char_main_message_specialspeedadd", sSpecialSpeed, rAdd.sCharName);
-		end
+	elseif sDescriptionText then
+		local sSpeedDescriptionTextLine = string.match(sDescriptionText, "<p>%s*<b>%s*Speed%s*</b>%s*:%s*(.-)</p>");
+		nSpeedValue = string.match(sSpeedDescriptionTextLine, "%d+");
+		sSpecialSpeed = string.match(sSpeedDescriptionTextLine, "%.(.*)");
+	end
+	local rCharacterSpeedNode = DB.findNode(rAdd.nodeChar.getPath("speed"));
+	if rCharacterSpeedNode and nSpeedValue then
+		DB.setValue(rCharacterSpeedNode, "base", "number", nSpeedValue);
+		ChatManager.SystemMessageResource("char_combat_message_speedadd", nSpeedValue, rAdd.sCharName);
+	end
+	if rCharacterSpeedNode and sSpecialSpeed then
+		DB.setValue(rCharacterSpeedNode, "special", "string", sSpecialSpeed);
+		ChatManager.SystemMessageResource("char_main_message_specialspeedadd", sSpecialSpeed, rAdd.sCharName);
 	end
 end
 
