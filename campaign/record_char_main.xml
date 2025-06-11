@@ -33,7 +33,7 @@
 						return CharManagerWith4ERaceExtension.onRaceLinkPressed(window.getDatabaseNode());
 					end
 				</script>
-			</linkfield_statich>
+			</linkfield_statich>	
 		</sheetdata>
 	</windowclass>
 </root>

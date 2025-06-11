@@ -19,6 +19,12 @@ function addRace(nodeChar, sRecord, tData)
 	--Add Traits
 	addRaceTraits(rAdd, sRecord, sDescriptionText);
 
+	--Add skill bonuses
+	addRaceSkill(rAdd, sRecord, sDescriptionText);
+
+	--Add ability score bonuses
+	CharRaceManager.helperResolveStatIncreaseOnRaceDrop(rAdd, sRecord, sDescriptionText);
+
 	-- Notification
 	ChatManager.SystemMessageResource("char_abilities_message_raceadd", sRaceName, rAdd.sCharName);
 
@@ -87,8 +93,6 @@ function addRacePowers(rAdd, sRecord, sDescriptionText)
 		local sRecordPowerNode = DB.findNode(DB.getPath(sRecord, "powers"));
 		local nodePowerChildren = DB.getChildren(sRecordPowerNode);
 		for nodeName,nodeChild in pairs(nodePowerChildren) do
-			Debug.console("Flavor:",DB.getText(DB.getPath(nodeChild, "flavor")));
-			Debug.console("Description:",DB.getText(DB.getPath(nodeChild, "shortdescription")));
 			local sRacialPowerName = DB.getText(DB.getPath(nodeChild, "name"));
 			local sRacialActionSpeed = DB.getText(DB.getPath(nodeChild, "action"));
 			local sRacialSource = DB.getText(DB.getPath(nodeChild, "source"));
@@ -143,7 +147,7 @@ function addRaceSpeed(rAdd, sRecord, sDescriptionText)
 		end
 		if sSpecialSpeed then
 			DB.setValue(rCharacterSpeedNode, "special", "string", sSpecialSpeed);
-			ChatManager.SystemMessageResource("char_combat_message_specialspeedadd", sSpecialSpeed, rAdd.sCharName);
+			ChatManager.SystemMessageResource("char_main_message_specialspeedadd", sSpecialSpeed, rAdd.sCharName);
 		end
 	end
 end
@@ -162,7 +166,7 @@ function addRaceSize(rAdd, sRecord, sDescriptionText)
 		end
 		if sSizeValue then
 			DB.setValue(rAdd.nodeChar, "size", "string", sSizeValue);
-			ChatManager.SystemMessageResource("char_combat_message_sizeadd", sSizeValue, rAdd.sCharName);
+			ChatManager.SystemMessageResource("char_notes_message_sizeadd", sSizeValue, rAdd.sCharName);
 		end
 	end
 end
@@ -181,7 +185,7 @@ function addRaceVision(rAdd, sRecord, sDescriptionText)
 		end
 		if sVisionValue then
 			DB.setValue(rAdd.nodeChar, "senses", "string", sVisionValue);
-			ChatManager.SystemMessageResource("char_combat_message_visioneadd", sVisionValue, rAdd.sCharName);
+			ChatManager.SystemMessageResource("char_main_message_visionadd", sVisionValue, rAdd.sCharName);
 		end
 	end
 end
@@ -193,17 +197,120 @@ function addRaceLanguages(rAdd, sRecord, sDescriptionText)
 		local rLanguagesNode = DB.findNode(DB.getPath(sRecord, "languages"));
 		local sLanguagesValue = '';
 		if rLanguagesTraitsNode then
-			local rSizeTextNode = DB.getChild(rLanguagesTraitsNode, "text");
-			sLanguagesValue = DB.getText(rSizeTextNode);
+			local rLanguageTextNode = DB.getChild(rLanguagesTraitsNode, "text");
+			sLanguagesValue = DB.getText(rLanguageTextNode);
 		elseif rLanguagesNode then
 			sLanguagesValue = DB.getText(rLanguagesNode);
 		end
 		local tLanguages = StringManager.split(sLanguagesValue, ',', true);
 		for _,x in pairs(tLanguages) do
-			Debug.console("x:", x);
 			local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("languagelist"));
 			DB.setValue(rCreatedIDChildNode, "name", "string", x);
-			ChatManager.SystemMessageResource("char_combat_message_languageadd", x, rAdd.sCharName);
+			ChatManager.SystemMessageResource("char_notes_message_languageadd", x, rAdd.sCharName);
+		end
+	end
+end
+
+function addRaceSkill(rAdd, sRecord, sDescriptionText)
+	--Reset racial skill bonuses before adding new ones
+	for __,y in pairs(DB.getChildren(rAdd.nodeChar, "skilllist")) do
+		DB.setValue(y, "race", "number", "0");
+	end
+
+	local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
+	if rRecordTraitsNode then
+		local rSkillTraitsNode = DB.getChild(rRecordTraitsNode, "skillbonuses");
+		local sSkillValue = '';
+		if rSkillTraitsNode then
+			local rSkillTextNode = DB.getChild(rSkillTraitsNode, "text");
+			sSkillText = DB.getText(rSkillTextNode);
+		end
+		local tSkillList = StringManager.split(sSkillText, ',', true);
+		for _,x in pairs(tSkillList) do
+			local skillBonus = string.match(x, '%d');
+			local skillName = string.match(x, '%a+');
+			local rCreatedIDChildren = DB.getChildren(rAdd.nodeChar, "skilllist");
+			for __,y in pairs(rCreatedIDChildren) do
+				if DB.getText(y, "label") == skillName then
+					DB.setValue(y, "race", "number", skillBonus);
+				end
+			end
+			ChatManager.SystemMessageResource("char_skills_message_skillbonusadd", skillBonus, skillName, rAdd.sCharName);
+		end
+	end
+end
+
+function helperResolveStatIncreaseOnRaceDrop(rAdd, sRecord, sDescriptionText)
+	if not rAdd then
+		return;
+	end
+	local rRecordTraitsNode = DB.findNode(DB.getPath(sRecord, "traits"));
+	if rRecordTraitsNode then
+		local rAbilityScoreTraitsNode = DB.getChild(rRecordTraitsNode, "abilityscores");
+		local rAbilityScoresNode = DB.findNode(DB.getPath(sRecord, "abilityscores"));
+		local sAbilityScoresValue = '';
+		if rAbilityScoreTraitsNode then
+			local rAbilityScoreTextNode = DB.getChild(rAbilityScoreTraitsNode, "text");
+			sAbilityScoresValue = DB.getText(rAbilityScoreTextNode);
+		elseif rAbilityScoresNode then
+			sAbilityScoresValue = DB.getText(rAbilityScoresNode);		
+		end
+		local tAbilityScoreBonuses = StringManager.split(sAbilityScoresValue, ',', true);
+		for _,x in pairs(tAbilityScoreBonuses) do
+			-- Direct increase ability scores that don't have a choice
+			if not string.find(x, "or") then
+				local rAbilitiesNode = DB.findNode(DB.getPath(rAdd.nodeChar, "abilities"));
+				local sAbilityScoreName = string.match(x, "%a+");
+				local nAbiltyScoreBonusNumber = string.match(x, "%d+");
+				if not nAbiltyScoreBonusNumber then
+					nAbiltyScoreBonusNumber = "2";
+				end
+				local rAbilitiesNodeChild = DB.getChild(rAbilitiesNode, string.lower(sAbilityScoreName));
+				if rAbilitiesNodeChild then
+					local nCurrentAbilityScore = DB.getValue(rAbilitiesNodeChild, "score", 0);
+					DB.setValue(rAbilitiesNodeChild, "race", "number", nAbiltyScoreBonusNumber);
+					DB.setValue(rAbilitiesNodeChild, "score", "number", nCurrentAbilityScore + nAbiltyScoreBonusNumber);
+					ChatManager.SystemMessageResource("char_main_message_statbonusadd", nAbiltyScoreBonusNumber, sAbilityScoreName, rAdd.sCharName);
+				end
+			end
+			
+			-- Display a selection dialogue if there is a choice for ability score increase
+			if string.match(x, "or") then
+				local tOptions = StringManager.splitByPattern(x, "or", true);
+				local tDialogData = {
+					title = Interface.getString("char_build_title_selectraceabilitybonus"),
+					msg = Interface.getString("char_build_message_selectraceabilitybonus"),
+					options = tOptions,
+					callback = CharRaceManager.callbackResolveStatIncreaseOnRaceDrop,
+					custom = rAdd,
+				};
+				DialogManager.requestSelectionDialog(tDialogData);
+			end
+		end
+	end
+end
+function callbackResolveStatIncreaseOnRaceDrop(tSelection, rAdd, tSelectionLinks)
+	if not tSelectionLinks or (#tSelectionLinks ~= 1) then
+		CharManager.outputUserMessage("char_error_addrace");
+		return;
+	end
+	if not tSelection then
+		CharManager.outputUserMessage("char_error_addrace");
+		return;
+	end
+	local rAbilitiesNode = DB.findNode(DB.getPath(rAdd.nodeChar, "abilities"));
+	local sAbilityScore = string.lower(string.match(tSelection[1], "%a+"));
+	local nSelectionBonus = string.match(tSelection[1], "%d+");
+	if not nSelectionBonus then
+		nSelectionBonus = "2";
+	end
+	local rAbilitiesNodeChildren = DB.getChildren(rAbilitiesNode);
+	for _,x in pairs(rAbilitiesNodeChildren) do
+		if DB.getName(x) == sAbilityScore then
+			local nCurrentAbilityScore = DB.getValue(x, "score", 0);
+			DB.setValue(x, "race", "number", nSelectionBonus);
+			DB.setValue(x, "score", "number", nCurrentAbilityScore + nSelectionBonus);
+			ChatManager.SystemMessageResource("char_main_message_statbonusadd", nSelectionBonus, sAbilityScore, rAdd.sCharName);
 		end
 	end
 end
@@ -234,7 +341,14 @@ function helperResolveAncestryOnRaceDrop(rAdd)
 	};
 	DialogManager.requestSelectionDialog(tDialogData);
 end
-
+function callbackResolveAncestryOnSpeciesDrop(tSelection, rAdd, tSelectionLinks)
+	if not tSelectionLinks or (#tSelectionLinks ~= 1) then
+		CharManager.outputUserMessage("char_error_addancestry");
+		return;
+	end
+	rAdd.sAncestryPath = tSelectionLinks[1].linkrecord;
+	CharSpeciesManager.helperAddSpecies(rAdd);
+end
 function helperAddSpecies(rAdd)
 	CharSpeciesManager.helperAddSpeciesMain(rAdd);
 	CharSpeciesManager.helperAddAncestry(rAdd);
