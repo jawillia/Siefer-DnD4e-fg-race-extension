@@ -227,10 +227,19 @@ function addRaceLanguages(rAdd, sRecord, sDescriptionText)
 		sLanguagesValue = string.match(sLanguagesDescriptionTextLine, "[%a,%s]+");
 	end
 	local tLanguages = StringManager.split(sLanguagesValue, ',', true);
+	local tCurrentLanguages = DB.getChildren(rAdd.nodeChar, "languagelist");
 	for _,x in pairs(tLanguages) do
-		local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("languagelist"));
-		DB.setValue(rCreatedIDChildNode, "name", "string", x);
-		ChatManager.SystemMessageResource("char_notes_message_languageadd", x, rAdd.sCharName);
+		local isLanguageInList = false;
+		for languageName, languageNode in pairs(tCurrentLanguages) do
+			if DB.getText(DB.getPath(languageNode, "name")) == x then
+				isLanguageInList = true;
+			end
+		end
+		if isLanguageInList == false then
+			local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("languagelist"));
+			DB.setValue(rCreatedIDChildNode, "name", "string", x);
+			ChatManager.SystemMessageResource("char_notes_message_languageadd", x, rAdd.sCharName);
+		end
 	end
 end
 
@@ -275,6 +284,17 @@ function helperResolveStatIncreaseOnRaceDrop(rAdd, sRecord, sDescriptionText)
 	if not rAdd then
 		return;
 	end
+
+	--Reset racial ability score bonuses before adding new ones
+	for __,y in pairs(DB.getChildren(rAdd.nodeChar, "abilities")) do
+		local nCurrentAbilityScore = DB.getValue(y, "score", 0);
+		local nCurrentAbilityRaceBonus = DB.getValue(y, "race", "0");
+		if nCurrentAbilityRaceBonus and nCurrentAbilityRaceBonus ~= "0" then
+			DB.setValue(y, "score", "number", nCurrentAbilityScore - nCurrentAbilityRaceBonus);
+			DB.setValue(y, "race", "number", "0");
+		end
+	end
+
 	local sAbilityScoresValue = '';
 	local rAbilityScoresNode = DB.findNode(DB.getPath(sRecord, "abilityscores"));
 	if rAbilityScoresNode then
@@ -350,6 +370,8 @@ function callbackResolveStatIncreaseOnRaceDrop(tSelection, rAdd, tSelectionLinks
 		end
 	end
 end
+
+-----------------------------------------------------------
 
 function helperResolveAncestryOnRaceDrop(rAdd)
 	if not rAdd then
