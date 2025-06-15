@@ -34,87 +34,124 @@ function addRace(nodeChar, sRecord, tData)
 end
 
 function addRaceFeatures(rAdd, sRecord, sDescriptionText)
-	local sPattern = '<link class="powerdesc" recordname="reference.features.(%w+)@([%w%s]+)">';
-	local sFeaturesLink = string.gmatch(sDescriptionText, sPattern);
-	local isDescriptionFeatureLinkEmpty = true;
-	for w,v in sFeaturesLink do
-		isDescriptionFeatureLinkEmpty = false;
-		local sPattern = "reference.features." .. w .. "@" .. v;
-		local sRacialFeatureName = DB.getText(DB.getPath(sPattern, "name"));
-		local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("specialabilitylist"));
-		DB.setValue(rCreatedIDChildNode, "shortcut", "windowreference", "powerdesc", sPattern);
-		DB.setValue(rCreatedIDChildNode, "value", "string", sRacialFeatureName);
-		ChatManager.SystemMessageResource("char_abilities_message_featureadd", sRacialFeatureName, rAdd.sCharName);
-	end
-	---- then through the newly added feature tag
-	if isDescriptionFeatureLinkEmpty == true then
-		local sRecordFeatureNode = DB.findNode(DB.getPath(sRecord, "features"));
+	local tCurrentFeatures = DB.getChildren(rAdd.nodeChar, "specialabilitylist");
+	---- first through the newly added feature tag
+	local sRecordFeatureNode = DB.findNode(DB.getPath(sRecord, "features"));
+	if sRecordFeatureNode then
 		local nodeFeatureChildren = DB.getChildren(sRecordFeatureNode);
 		for nodeName,nodeChild in pairs(nodeFeatureChildren) do
-			local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("specialabilitylist"));
-			DB.setValue(rCreatedIDChildNode, "description", "string", DB.getText(DB.getPath(nodeChild, "description")));
-      		DB.createChild(rCreatedIDChildNode, "shortcut", "windowreference");
-      		DB.setValue(rCreatedIDChildNode, "value", "string", DB.getText(DB.getPath(nodeChild, "name")));
-      		local sRacialFeatureName = DB.getText(rCreatedIDChildNode, "value");
-      		ChatManager.SystemMessageResource("char_abilities_message_featureadd", sRacialFeatureName, rAdd.sCharName);
-    	end
+			local isFeatureInList = false;
+			for _, featureNode in pairs(tCurrentFeatures) do
+				if DB.getText(featureNode, "value") == DB.getText(nodeChild, "name") then
+					isFeatureInList = true;
+					break;
+				end
+			end
+			if isFeatureInList == false then
+				local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("specialabilitylist"));
+				DB.setValue(rCreatedIDChildNode, "description", "string", DB.getText(DB.getPath(nodeChild, "description")));
+	      		DB.createChild(rCreatedIDChildNode, "shortcut", "windowreference");
+	      		DB.setValue(rCreatedIDChildNode, "value", "string", DB.getText(DB.getPath(nodeChild, "name")));
+	      		local sRacialFeatureName = DB.getText(rCreatedIDChildNode, "value");
+	      		ChatManager.SystemMessageResource("char_abilities_message_featureadd", sRacialFeatureName, rAdd.sCharName);
+	      	end
+		end
+	elseif sDescriptionText then
+	-- then through the description text
+		local sPattern = '<link class="powerdesc" recordname="reference.features.(%w+)@([%w%s]+)">';
+		local sFeaturesLink = string.gmatch(sDescriptionText, sPattern);
+		for w,v in sFeaturesLink do
+			local sPattern = "reference.features." .. w .. "@" .. v;
+			local sRacialFeatureName = DB.getText(DB.getPath(sPattern, "name"));
+			local isFeatureInList = false;
+			for _, featureNode in pairs(tCurrentFeatures) do
+				if DB.getText(DB.getPath(featureNode, "value")) == sRacialFeatureName then
+					isFeatureInList = true;
+					break;
+				end
+			end
+			if isFeatureInList == false then
+				local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("specialabilitylist"));
+				DB.setValue(rCreatedIDChildNode, "shortcut", "windowreference", "powerdesc", sPattern);
+				DB.setValue(rCreatedIDChildNode, "value", "string", sRacialFeatureName);
+				ChatManager.SystemMessageResource("char_abilities_message_featureadd", sRacialFeatureName, rAdd.sCharName);
+			end
+		end
 	end
 end
 
 function addRacePowers(rAdd, sRecord, sDescriptionText)
-	local referenceStaticNode = DB.findNode("reference.powers.");
-	local powersNode = DB.getChild(referenceStaticNode, "powers");
-	local sPowersPattern = '<link class="powerdesc" recordname="reference.powers.(%w+)@([%w%s]+)">';
-	local sPowersLink = string.gmatch(sDescriptionText, sPowersPattern);
-	local isDescriptionPowerLinkEmpty = true;
-	for w,v in sPowersLink do
-		isDescriptionPowerLinkEmpty = false;
-		local sPowersPattern = "reference.powers." .. w .. "@" .. v;
-		local sRacialPowerName = DB.getText(DB.getPath(sPowersPattern, "name"));
-		local sRacialActionSpeed = DB.getText(DB.getPath(sPowersPattern, "action"));
-		local sRacialSource = DB.getText(DB.getPath(sPowersPattern, "source"));
-		local sRacialKeywords = DB.getText(DB.getPath(sPowersPattern, "keywords"));
-		local sRacialRange = DB.getText(DB.getPath(sPowersPattern, "range"));
-		local sRacialRecharge = DB.getText(DB.getPath(sPowersPattern, "recharge"));
-		local sRacialFullDescription = DB.getText(DB.getPath(sPowersPattern, "flavor")) .. "\n\n" .. DB.getText(DB.getPath(sPowersPattern, "description"))
-		local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("powers"));
-		DB.setValue(rCreatedIDChildNode, "action", "string", sRacialActionSpeed);
-		DB.setValue(rCreatedIDChildNode, "name", "string", sRacialPowerName);
-		DB.setValue(rCreatedIDChildNode, "source", "string", sRacialSource);
-		DB.setValue(rCreatedIDChildNode, "keywords", "string", sRacialKeywords);
-		DB.setValue(rCreatedIDChildNode, "range", "string", sRacialRange);
-		DB.setValue(rCreatedIDChildNode, "recharge", "string", sRacialRecharge);
-		DB.setValue(rCreatedIDChildNode, "shortdescription", "string", sRacialFullDescription);
-		CharManager.parseDescription(rCreatedIDChildNode);
-		ChatManager.SystemMessageResource("char_abilities_message_poweradd", sRacialPowerName, rAdd.sCharName);
-	end
-	---- then through the newly added power tag
-	if isDescriptionPowerLinkEmpty == true then
-		local sRecordPowerNode = DB.findNode(DB.getPath(sRecord, "powers"));
+	local tCurrentPowers = DB.getChildren(rAdd.nodeChar, "powers");
+	--first try through the newly added powers node
+	local sRecordPowerNode = DB.findNode(DB.getPath(sRecord, "powers"));
+	if sRecordPowerNode then
 		local nodePowerChildren = DB.getChildren(sRecordPowerNode);
 		for nodeName,nodeChild in pairs(nodePowerChildren) do
 			local sRacialPowerName = DB.getText(DB.getPath(nodeChild, "name"));
-			local sRacialActionSpeed = DB.getText(DB.getPath(nodeChild, "action"));
-			local sRacialSource = DB.getText(DB.getPath(nodeChild, "source"));
-			local sRacialKeywords = DB.getText(DB.getPath(nodeChild, "keywords"));
-			local sRacialRange = DB.getText(DB.getPath(nodeChild, "range"));
-			local sRacialRecharge = DB.getText(DB.getPath(nodeChild, "recharge"));
-			local sRacialFlavor = DB.getText(DB.getPath(nodeChild, "flavor"));
-			if sRacialFlavor == nil then
-				sRacialFlavor = "";
+			local isPowerInList = false;
+			for _, powerNode in pairs(tCurrentPowers) do
+				if DB.getText(powerNode, "name") == DB.getText(nodeChild, "name") then
+					isPowerInList = true;
+					break;
+				end
 			end
-			local sRacialFullDescription = sRacialFlavor .. "\n\n" .. DB.getText(DB.getPath(nodeChild, "shortdescription"));
-			local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("powers"));
-			DB.setValue(rCreatedIDChildNode, "action", "string", sRacialActionSpeed);
-			DB.setValue(rCreatedIDChildNode, "name", "string", sRacialPowerName);
-			DB.setValue(rCreatedIDChildNode, "source", "string", sRacialSource);
-			DB.setValue(rCreatedIDChildNode, "keywords", "string", sRacialKeywords);
-			DB.setValue(rCreatedIDChildNode, "range", "string", sRacialRange);
-			DB.setValue(rCreatedIDChildNode, "recharge", "string", sRacialRecharge);
-			DB.setValue(rCreatedIDChildNode, "shortdescription", "string", sRacialFullDescription);
-			CharManager.parseDescription(rCreatedIDChildNode);
-			ChatManager.SystemMessageResource("char_abilities_message_poweradd", sRacialPowerName, rAdd.sCharName);
-    	end
+			if isPowerInList == false then
+				local sRacialActionSpeed = DB.getText(DB.getPath(nodeChild, "action"));
+				local sRacialSource = DB.getText(DB.getPath(nodeChild, "source"));
+				local sRacialKeywords = DB.getText(DB.getPath(nodeChild, "keywords"));
+				local sRacialRange = DB.getText(DB.getPath(nodeChild, "range"));
+				local sRacialRecharge = DB.getText(DB.getPath(nodeChild, "recharge"));
+				local sRacialFlavor = DB.getText(DB.getPath(nodeChild, "flavor"));
+				if sRacialFlavor == nil then
+					sRacialFlavor = "";
+				end
+				local sRacialFullDescription = sRacialFlavor .. "\n\n" .. DB.getText(DB.getPath(nodeChild, "shortdescription"));
+				local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("powers"));
+				DB.setValue(rCreatedIDChildNode, "action", "string", sRacialActionSpeed);
+				DB.setValue(rCreatedIDChildNode, "name", "string", sRacialPowerName);
+				DB.setValue(rCreatedIDChildNode, "source", "string", sRacialSource);
+				DB.setValue(rCreatedIDChildNode, "keywords", "string", sRacialKeywords);
+				DB.setValue(rCreatedIDChildNode, "range", "string", sRacialRange);
+				DB.setValue(rCreatedIDChildNode, "recharge", "string", sRacialRecharge);
+				DB.setValue(rCreatedIDChildNode, "shortdescription", "string", sRacialFullDescription);
+				CharManager.parseDescription(rCreatedIDChildNode);
+				ChatManager.SystemMessageResource("char_abilities_message_poweradd", sRacialPowerName, rAdd.sCharName);
+			end
+		end
+	elseif sDescriptionText then --then try through the description text
+		local referenceStaticNode = DB.findNode("reference.powers.");
+		local powersNode = DB.getChild(referenceStaticNode, "powers");
+		local sPowersPattern = '<link class="powerdesc" recordname="reference.powers.(%w+)@([%w%s]+)">';
+		local sPowersLink = string.gmatch(sDescriptionText, sPowersPattern);
+		for w,v in sPowersLink do
+			local sPowersPattern = "reference.powers." .. w .. "@" .. v;
+			local sRacialPowerName = DB.getText(DB.getPath(sPowersPattern, "name"));
+			local isPowerInList = false;
+			for _, powerNode in pairs(tCurrentPowers) do
+				if DB.getText(powerNode, "name") == sRacialPowerName then
+					isPowerInList = true;
+					break;
+				end
+			end
+			if isPowerInList == false then
+				local sRacialActionSpeed = DB.getText(DB.getPath(sPowersPattern, "action"));
+				local sRacialSource = DB.getText(DB.getPath(sPowersPattern, "source"));
+				local sRacialKeywords = DB.getText(DB.getPath(sPowersPattern, "keywords"));
+				local sRacialRange = DB.getText(DB.getPath(sPowersPattern, "range"));
+				local sRacialRecharge = DB.getText(DB.getPath(sPowersPattern, "recharge"));
+				local sRacialFullDescription = DB.getText(DB.getPath(sPowersPattern, "flavor")) .. "\n\n" .. DB.getText(DB.getPath(sPowersPattern, "description"))
+				local rCreatedIDChildNode = DB.createChild(rAdd.nodeChar.getPath("powers"));
+				DB.setValue(rCreatedIDChildNode, "action", "string", sRacialActionSpeed);
+				DB.setValue(rCreatedIDChildNode, "name", "string", sRacialPowerName);
+				DB.setValue(rCreatedIDChildNode, "source", "string", sRacialSource);
+				DB.setValue(rCreatedIDChildNode, "keywords", "string", sRacialKeywords);
+				DB.setValue(rCreatedIDChildNode, "range", "string", sRacialRange);
+				DB.setValue(rCreatedIDChildNode, "recharge", "string", sRacialRecharge);
+				DB.setValue(rCreatedIDChildNode, "shortdescription", "string", sRacialFullDescription);
+				CharManager.parseDescription(rCreatedIDChildNode);
+				ChatManager.SystemMessageResource("char_abilities_message_poweradd", sRacialPowerName, rAdd.sCharName);
+			end
+		end
 	end
 end
 
@@ -233,6 +270,7 @@ function addRaceLanguages(rAdd, sRecord, sDescriptionText)
 		for languageName, languageNode in pairs(tCurrentLanguages) do
 			if DB.getText(DB.getPath(languageNode, "name")) == x then
 				isLanguageInList = true;
+				break;
 			end
 		end
 		if isLanguageInList == false then
