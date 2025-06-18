@@ -347,7 +347,8 @@ function helperResolveStatIncreaseOnRaceDrop(rAdd, sRecord, sDescriptionText)
 			end
 		end
 	elseif sDescriptionText then
-		local sAbilityScoresDescriptionTextLine = string.match(sDescriptionText, "<p>%s*<b>%s*Skill Bonuses%s*</b>%s*:%s*(.-)</p>");
+		local sAbilityScoresDescriptionTextLine = string.match(sDescriptionText, "<p>%s*<b>%s*Ability scores%s*</b>%s*:%s*(.-)</p>");
+		Debug.console("sAbilityScoresDescriptionTextLine:",sAbilityScoresDescriptionTextLine);
 		sAbilityScoresValue = string.match(sAbilityScoresDescriptionTextLine, "[%w,%s%+]+");
 	end
 	local tAbilityScoreBonuses = StringManager.split(sAbilityScoresValue, ',', true);
