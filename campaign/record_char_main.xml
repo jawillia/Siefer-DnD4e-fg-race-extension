@@ -9,10 +9,14 @@
 	<windowclass name="charsheet_main" merge="join">
 		<script>
 			function onDrop(x, y, draginfo)
+				if super and super.onDrop then
+					super.onDrop(x, y, draginfo);
+				end
+
 				if draginfo.isType("shortcut") then
 					local sClass, sRecord = draginfo.getShortcutData();
 					if StringManager.startsWith(sRecord, "reference.races") or StringManager.startsWith(sRecord, "race.id-") then
-						return CharBuildDropManager.addInfoDB(getDatabaseNode(), sClass, sRecord);
+						return CharRaceBuildDropManager.addInfoDB(getDatabaseNode(), sClass, sRecord);
 					end
 				end
 			end

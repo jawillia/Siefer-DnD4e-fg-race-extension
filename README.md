@@ -12,3 +12,5 @@ v.0.6.0 - 06/17/2025 - Race bonuses should be able to parse better from descript
 
 v0.6.1 - 10/06/2025 - Fixed racial skill bonuses not getting added to characters.
 
+v0.6.2 - 11/02/2025 - Fixed a bug preventing this extension from working with my DnD 4e Classes Extension.
+

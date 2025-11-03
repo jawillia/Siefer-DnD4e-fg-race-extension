@@ -4,7 +4,7 @@
 --
 
 function addRace(nodeChar, sRecord, tData)
-	local rAdd = CharBuildDropManager.helperBuildAddStructure(nodeChar, "powerdesc", sRecord, tData);
+	local rAdd = CharRaceBuildDropManager.helperBuildAddStructure(nodeChar, "powerdesc", sRecord, tData);
 	local sRaceName = DB.getText(DB.getPath(sRecord, "name"));
 
 	-- Add Race Features

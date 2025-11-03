@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- This is our MVP for the Practice Extension -->
 <root release="3.0" version="6">
-	<announcement text="DnD 4e Races extension made by SieferSeesSomething is activated. Last release 06/17/2025" font="emotefont" icon="rulesetlogo_CoreRPG"/>
+	<announcement text="DnD 4e Races extension made by SieferSeesSomething is activated. Last release 11/2/2025" font="emotefont" icon="rulesetlogo_CoreRPG"/>
 	<properties>
 		<name>DnD 4e - Character Races Extension</name>
-		<version>0.6.0</version>
+		<version>0.6.2</version>
 		<author>Jason Williams</author>
 		<description>
 		Adds a character options menu for races and a link to the character sheet.
@@ -16,7 +16,7 @@
 
 	<base>
 		<!-- Library Data -->
-		<script name="LibraryDataExtensionPractice" file="scripts/data_library.lua" />
+		<script name="4eRacesExtensionLibraryData" file="scripts/data_library.lua" />
 
 		<!-- Campaign -->
 		<includefile source="campaign/record_char_main.xml" />
@@ -25,7 +25,7 @@
 
 		<!-- High-Level Scripts -->
 		<script name="CharManagerWith4ERaceExtension" file="scripts/manager_char_4e.lua" />		
-		<script name="CharBuildDropManager" file="scripts\manager_char_build_drop_4e.lua" />
+		<script name="CharRaceBuildDropManager" file="scripts/manager_char_build_drop_4e.lua" />
 		<script name="CharRaceManager" file="scripts/manager_char_race_4e.lua" />
 		<script name="RaceManager" file="scripts/manager_race_4e.lua" />
 
