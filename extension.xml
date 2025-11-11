@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- This is our MVP for the Practice Extension -->
 <root release="3.0" version="6">
-	<announcement text="DnD 4e Races extension made by SieferSeesSomething is activated. Last release 11/2/2025" font="emotefont" icon="rulesetlogo_CoreRPG"/>
+	<announcement text="DnD 4e Races extension made by SieferSeesSomething is activated. Last release 11/10/2025" font="emotefont" icon="rulesetlogo_CoreRPG"/>
 	<properties>
 		<name>DnD 4e - Character Races Extension</name>
-		<version>0.6.2</version>
+		<version>0.6.3</version>
 		<author>Jason Williams</author>
 		<description>
 		Adds a character options menu for races and a link to the character sheet.
@@ -22,6 +22,7 @@
 		<includefile source="campaign/record_char_main.xml" />
 		<includefile source="campaign/record_race.xml" />
 		<includefile source="campaign/record_char_skill_with_racebonus.xml" />
+		<includefile source="campaign/record_char_skills.xml" /> 
 
 		<!-- High-Level Scripts -->
 		<script name="CharManagerWith4ERaceExtension" file="scripts/manager_char_4e.lua" />		
