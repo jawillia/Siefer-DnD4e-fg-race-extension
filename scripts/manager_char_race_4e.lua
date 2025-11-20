@@ -300,7 +300,9 @@ function addRaceSkill(rAdd, sRecord, sDescriptionText)
 		end
 	elseif sDescriptionText then
 		local sSkillBonusesDescriptionTextLine = string.match(sDescriptionText, "<p>%s*<b>%s*Skill Bonuses%s*</b>%s*:%s*(.-)</p>");
-		sSkillValue = string.match(sSkillBonusesDescriptionTextLine, "[%w,%s%+]+");
+		if sSkillBonusesDescriptionTextLine then
+			sSkillValue = string.match(sSkillBonusesDescriptionTextLine, "[%w,%s%+]+");
+		end
 	end
 	if sSkillValue then
 		local tSkillList = StringManager.split(sSkillValue, ',', true);
@@ -354,8 +356,10 @@ function helperResolveStatIncreaseOnRaceDrop(rAdd, sRecord, sDescriptionText)
 	local tAbilityScoreBonuses = StringManager.split(sAbilityScoresValue, ',', true);
 	--If certain options are checked, bypass the standard ability score increases
 	local sRaceAbilityScoreBonusOption = OptionsManager.getOption("RACE_ABILITY_SCORE_VARIANTS");
+	--Ignore this option for the human race, will figure something else out for them
+	local sRaceName = DB.getText(DB.getPath(sRecord, "name"));
 	--If both_free option is selected, replace first ability score choice with being able to choose anything
-	if sRaceAbilityScoreBonusOption and sRaceAbilityScoreBonusOption == "both_free" then
+	if sRaceAbilityScoreBonusOption and sRaceAbilityScoreBonusOption == "both_free" and string.upper(sRaceName) ~= "HUMAN"  then
 		local tOptions = { "+2 Strength", "+2 Constitution", "+2 Dexterity", "+2 Intelligence", "+2 Wisdom", "+2 Charisma" };
 		--Choose first ability score from anything
 		local tDialogData = {
@@ -375,7 +379,7 @@ function helperResolveStatIncreaseOnRaceDrop(rAdd, sRecord, sDescriptionText)
 			custom = rAdd,
 		};
 		DialogManager.requestSelectionDialog(tDialogData);
-	elseif sRaceAbilityScoreBonusOption and sRaceAbilityScoreBonusOption == "first_half_second_free" then
+	elseif sRaceAbilityScoreBonusOption and sRaceAbilityScoreBonusOption == "first_half_second_free" and string.upper(sRaceName) ~= "HUMAN" then
 		--Choose first ability score from any of the race's normal options
 		local tOptions = { };
 		for _,x in pairs(tAbilityScoreBonuses) do
@@ -433,6 +437,8 @@ function helperResolveStatIncreaseOnRaceDrop(rAdd, sRecord, sDescriptionText)
 				local tOptions = {};
 				--But, if second_free is chosen, first ability score is normal, second is from anything
 				if sRaceAbilityScoreBonusOption and sRaceAbilityScoreBonusOption == "second_free" then
+					tOptions = { "+2 Strength", "+2 Constitution", "+2 Dexterity", "+2 Intelligence", "+2 Wisdom", "+2 Charisma" };
+				elseif string.match(x, "+%d to %a%a%a ability score of your choice") then
 					tOptions = { "+2 Strength", "+2 Constitution", "+2 Dexterity", "+2 Intelligence", "+2 Wisdom", "+2 Charisma" };
 				else
 					tOptions = StringManager.splitByPattern(x, "or", true);
