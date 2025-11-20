@@ -352,35 +352,100 @@ function helperResolveStatIncreaseOnRaceDrop(rAdd, sRecord, sDescriptionText)
 		sAbilityScoresValue = string.match(sAbilityScoresDescriptionTextLine, "[%w,%s%+]+");
 	end
 	local tAbilityScoreBonuses = StringManager.split(sAbilityScoresValue, ',', true);
-	for _,x in pairs(tAbilityScoreBonuses) do
-		-- Direct increase ability scores that don't have a choice
-		if not string.find(x, "or") then
-			local rAbilitiesNode = DB.findNode(DB.getPath(rAdd.nodeChar, "abilities"));
-			local sAbilityScoreName = string.match(x, "%a+");
-			local nAbiltyScoreBonusNumber = string.match(x, "%d+");
-			if not nAbiltyScoreBonusNumber then
-				nAbiltyScoreBonusNumber = "2";
-			end
-			local rAbilitiesNodeChild = DB.getChild(rAbilitiesNode, string.lower(sAbilityScoreName));
-			if rAbilitiesNodeChild then
-				local nCurrentAbilityScore = DB.getValue(rAbilitiesNodeChild, "score", 0);
-				DB.setValue(rAbilitiesNodeChild, "race", "number", nAbiltyScoreBonusNumber);
-				DB.setValue(rAbilitiesNodeChild, "score", "number", nCurrentAbilityScore + nAbiltyScoreBonusNumber);
-				ChatManager.SystemMessageResource("char_main_message_statbonusadd", nAbiltyScoreBonusNumber, sAbilityScoreName, rAdd.sCharName);
+	--If certain options are checked, bypass the standard ability score increases
+	local sRaceAbilityScoreBonusOption = OptionsManager.getOption("RACE_ABILITY_SCORE_VARIANTS");
+	--If both_free option is selected, replace first ability score choice with being able to choose anything
+	if sRaceAbilityScoreBonusOption and sRaceAbilityScoreBonusOption == "both_free" then
+		local tOptions = { "+2 Strength", "+2 Constitution", "+2 Dexterity", "+2 Intelligence", "+2 Wisdom", "+2 Charisma" };
+		--Choose first ability score from anything
+		local tDialogData = {
+			title = Interface.getString("char_build_title_selectraceabilitybonus"),
+			msg = Interface.getString("char_build_message_selectraceabilitybonus"),
+			options = tOptions,
+			callback = CharRaceManager.callbackResolveStatIncreaseOnRaceDrop,
+			custom = rAdd,
+		};
+		DialogManager.requestSelectionDialog(tDialogData);
+		--Choose second ability score from anything
+		local tDialogData = {
+			title = Interface.getString("char_build_title_selectraceabilitybonus"),
+			msg = Interface.getString("char_build_message_selectraceabilitybonus"),
+			options = tOptions,
+			callback = CharRaceManager.callbackResolveStatIncreaseOnRaceDrop,
+			custom = rAdd,
+		};
+		DialogManager.requestSelectionDialog(tDialogData);
+	elseif sRaceAbilityScoreBonusOption and sRaceAbilityScoreBonusOption == "first_half_second_free" then
+		--Choose first ability score from any of the race's normal options
+		local tOptions = { };
+		for _,x in pairs(tAbilityScoreBonuses) do
+			if not string.find(x, "or") then
+				local sFirstAbilityScoreName = string.match(x, "[%w%s+]+");
+				Debug.console("sFirstAbilityScoreName", sFirstAbilityScoreName);
+				table.insert(tOptions, sFirstAbilityScoreName);
+			else
+				local tNextAbilityScoreNames = StringManager.splitByPattern(x, "or", true);
+				for i,v in pairs(tNextAbilityScoreNames) do
+					Debug.console("v", v);
+					table.insert(tOptions, v);
+				end
 			end
 		end
-		
-		-- Display a selection dialogue if there is a choice for ability score increase
-		if string.match(x, "or") then
-			local tOptions = StringManager.splitByPattern(x, "or", true);
-			local tDialogData = {
-				title = Interface.getString("char_build_title_selectraceabilitybonus"),
-				msg = Interface.getString("char_build_message_selectraceabilitybonus"),
-				options = tOptions,
-				callback = CharRaceManager.callbackResolveStatIncreaseOnRaceDrop,
-				custom = rAdd,
-			};
-			DialogManager.requestSelectionDialog(tDialogData);
+		local tDialogData = {
+			title = Interface.getString("char_build_title_selectraceabilitybonus"),
+			msg = Interface.getString("char_build_message_selectraceabilitybonus"),
+			options = tOptions,
+			callback = CharRaceManager.callbackResolveStatIncreaseOnRaceDrop,
+			custom = rAdd,
+		};
+		DialogManager.requestSelectionDialog(tDialogData);
+		--Choose second ability score from anything
+		local tOptions = { "+2 Strength", "+2 Constitution", "+2 Dexterity", "+2 Intelligence", "+2 Wisdom", "+2 Charisma" };
+		local tDialogData = {
+			title = Interface.getString("char_build_title_selectraceabilitybonus"),
+			msg = Interface.getString("char_build_message_selectraceabilitybonus"),
+			options = tOptions,
+			callback = CharRaceManager.callbackResolveStatIncreaseOnRaceDrop,
+			custom = rAdd,
+		};
+		DialogManager.requestSelectionDialog(tDialogData);
+	else
+		for _,x in pairs(tAbilityScoreBonuses) do
+			-- Direct increase ability scores that don't have a choice
+			if not string.find(x, "or") then
+				local rAbilitiesNode = DB.findNode(DB.getPath(rAdd.nodeChar, "abilities"));
+				local sAbilityScoreName = string.match(x, "%a+");
+				local nAbiltyScoreBonusNumber = string.match(x, "%d+");
+				if not nAbiltyScoreBonusNumber then
+					nAbiltyScoreBonusNumber = "2";
+				end
+				local rAbilitiesNodeChild = DB.getChild(rAbilitiesNode, string.lower(sAbilityScoreName));
+				if rAbilitiesNodeChild then
+					local nCurrentAbilityScore = DB.getValue(rAbilitiesNodeChild, "score", 0);
+					DB.setValue(rAbilitiesNodeChild, "race", "number", nAbiltyScoreBonusNumber);
+					DB.setValue(rAbilitiesNodeChild, "score", "number", nCurrentAbilityScore + nAbiltyScoreBonusNumber);
+					ChatManager.SystemMessageResource("char_main_message_statbonusadd", nAbiltyScoreBonusNumber, sAbilityScoreName, rAdd.sCharName);
+				end
+			end
+
+			-- Display a selection dialogue if there is a choice for ability score increase
+			if string.match(x, "or") then
+				local tOptions = {};
+				--But, if second_free is chosen, first ability score is normal, second is from anything
+				if sRaceAbilityScoreBonusOption and sRaceAbilityScoreBonusOption == "second_free" then
+					tOptions = { "+2 Strength", "+2 Constitution", "+2 Dexterity", "+2 Intelligence", "+2 Wisdom", "+2 Charisma" };
+				else
+					tOptions = StringManager.splitByPattern(x, "or", true);
+				end
+				local tDialogData = {
+					title = Interface.getString("char_build_title_selectraceabilitybonus"),
+					msg = Interface.getString("char_build_message_selectraceabilitybonus"),
+					options = tOptions,
+					callback = CharRaceManager.callbackResolveStatIncreaseOnRaceDrop,
+					custom = rAdd,
+				};
+				DialogManager.requestSelectionDialog(tDialogData);
+			end
 		end
 	end
 end

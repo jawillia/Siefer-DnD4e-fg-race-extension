@@ -21,4 +21,11 @@
 	<string name="race_header_features">Racial Features</string>
 	<string name="library_recordtype_empty_racialfeature">&#171; New Racial Feature &#187;</string>
 	<string name="race_header_featurepowers">Racial Powers</string>
+
+	<!-- Options -->
+	<string name="option_label_RACE_ABILITY_SCORE_VARIANTS">Race: Ability Score Bonuses</string>
+
+	<string name="option_val_RACE_ABILITY_SCORE_VARIANTS_no_restrictions">Both Free</string>
+	<string name="option_val_RACE_ABILITY_SCORE_VARIANTS_second_no_restrictions">2nd Free</string>
+	<string name="option_val_RACE_ABILITY_SCORE_VARIANTS_first_half_second_no_restrictions">1st Half, 2nd Free</string>
 </root>
